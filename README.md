@@ -191,7 +191,7 @@ Ouvrir l'URL dans le navigateur → l'écran de login Flutter doit apparaître.
 
 Se connecter avec :
 ```
-Email    : operator@farmersmarket.ci
+Email    : operator1@farmersmarket.ci
 Password : password
 ```
 
