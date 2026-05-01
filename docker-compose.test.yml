@@ -1,0 +1,44 @@
+services:
+
+  # ── Tests API Laravel ────────────────────────────────────────────────────
+  # PHPUnit utilise SQLite en mémoire (voir phpunit.xml) — pas besoin de MySQL.
+  # Usage : docker compose -f docker-compose.test.yml run --rm api-test
+  api-test:
+    build:
+      context: ../farmers-market-api
+      dockerfile: Dockerfile
+    # On écrase l'entrypoint pour lancer directement les tests
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        echo ""
+        echo "============================================"
+        echo "   Tests API Laravel"
+        echo "============================================"
+        cp /var/www/.env.example /var/www/.env 2>/dev/null || true
+        php artisan key:generate --force --no-interaction
+        php artisan test --colors=always
+    environment:
+      APP_ENV: testing
+      APP_KEY: base64:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCdEfG=
+      # phpunit.xml override : DB_CONNECTION=sqlite, DB_DATABASE=:memory:
+      # Ces valeurs ne sont là qu'en fallback — phpunit.xml a la priorité.
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+
+  # ── Tests Flutter ────────────────────────────────────────────────────────
+  # Usage : docker compose -f docker-compose.test.yml run --rm flutter-test
+  flutter-test:
+    image: ghcr.io/cirruslabs/flutter:stable
+    working_dir: /app
+    volumes:
+      - .:/app
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        echo ""
+        echo "============================================"
+        echo "   Tests Flutter"
+        echo "============================================"
+        flutter pub get
+        flutter test --reporter compact

@@ -1,0 +1,70 @@
+services:
+
+  # ── MySQL 8 ─────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: farmers_market_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: farmers_market
+      MYSQL_USER: farmer_user
+      MYSQL_PASSWORD: farmer_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1",
+             "-u", "farmer_user", "--password=farmer_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  # ── Laravel API ──────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ../farmers-market-api   # chemin relatif vers le dépôt API
+      dockerfile: Dockerfile
+    container_name: farmers_market_api
+    restart: unless-stopped
+    environment:
+      APP_ENV: local
+      # Clé fixe pour que les tokens Sanctum restent valides entre les redémarrages.
+      # NE PAS utiliser cette clé en production.
+      APP_KEY: base64:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789ABCdEfG=
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: farmers_market
+      DB_USERNAME: farmer_user
+      DB_PASSWORD: farmer_pass
+      SANCTUM_STATEFUL_DOMAINS: "localhost,127.0.0.1,localhost:80"
+    ports:
+      - "8080:8000"   # Accès direct à l'API (pour Postman, etc.)
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+
+  # ── Flutter Web (Nginx) ──────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: farmers_market_app
+    restart: unless-stopped
+    ports:
+      - "80:80"       # Application mobile web → http://localhost
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  db_data:
+    driver: local

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Farmers Market App</title>
+  <script>
+    // GitHub Pages ne supporte pas le routing HTML5 des SPA.
+    // Ce script redirige toutes les URLs vers index.html tout en
+    // conservant le chemin dans un paramètre de requête.
+    var segmentCount = 1;
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+<body></body>
+</html>
