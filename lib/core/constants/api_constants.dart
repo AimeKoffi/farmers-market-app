@@ -8,8 +8,9 @@ class ApiConstants {
   );
   // static const String baseUrl = 'http://192.168.1.75:8000/api'; // device physique
 
-  static const int connectTimeout = 15000;
-  static const int receiveTimeout = 15000;
+  // Render free tier se réveille en 30-60s après inactivité
+  static const int connectTimeout = 60000;
+  static const int receiveTimeout = 30000;
 
   // Endpoints
   static const String login        = '/login';
