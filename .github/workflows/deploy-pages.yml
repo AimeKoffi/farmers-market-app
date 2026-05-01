@@ -54,10 +54,9 @@ jobs:
       - name: Build Flutter Web
         run: |
           flutter build web --release \
-            --dart-define=API_URL="${{ vars.API_URL || 'https://farmers-market-api.onrender.com/api' }}" \
+            --dart-define=API_URL="${{ secrets.API_URL || vars.API_URL || 'https://farmers-market-api-27ih.onrender.com/api' }}" \
             --base-href="/${{ github.event.repository.name }}/"
         env:
-          # Supprime les warnings inutiles du build
           FLUTTER_WEB_RENDERER: canvaskit
 
       # ── 6. Configurer GitHub Pages ─────────────────────────────────────
